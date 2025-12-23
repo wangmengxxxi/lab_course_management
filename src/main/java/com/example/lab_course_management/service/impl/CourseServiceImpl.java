@@ -111,6 +111,34 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
 
     @Override
     @Transactional
+    public Boolean approveCourse(Long courseId, Integer status) {
+        // 1. 校验参数
+        if (courseId == null || status == null) {
+            throw new IllegalArgumentException("课程ID和状态不能为空");
+        }
+
+        if (status != 1 && status != 2) {
+            throw new IllegalArgumentException("状态值无效,1-通过,2-拒绝");
+        }
+
+        // 2. 查询课程是否存在
+        Course course = this.getById(courseId);
+        if (course == null) {
+            throw new IllegalArgumentException("课程不存在");
+        }
+
+        // 3. 更新课程状态
+        course.setStatus(status);
+        boolean updateResult = this.updateById(course);
+        if (!updateResult) {
+            throw new RuntimeException("更新课程状态失败");
+        }
+
+        return true;
+    }
+
+    @Override
+    @Transactional
     public Boolean approveCourseSchedule(Long courseId, ScheduleRequest scheduleRequest) {
         // 1. 校验参数
         if (courseId == null || scheduleRequest == null || scheduleRequest.getLabId() == null) {
@@ -257,12 +285,25 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
     }
 
     @Override
-    public PageResult<CourseVO> listCoursesByPage(BasePageQuery basePageQuery) {
-        // 1. 分页查询课程
-        Page<Course> page = new Page<>(basePageQuery.getPageNum(), basePageQuery.getPageSize());
-        Page<Course> coursePage = this.page(page);
+    public PageResult<CourseVO> listCoursesByPage(com.example.lab_course_management.model.dto.query.CoursePageQuery coursePageQuery) {
+        // 1. 构建查询条件
+        QueryWrapper<Course> queryWrapper = new QueryWrapper<>();
+        
+        // 添加状态筛选
+        if (coursePageQuery.getStatus() != null) {
+            queryWrapper.eq("status", coursePageQuery.getStatus());
+        }
+        
+        // 添加教师ID筛选
+        if (coursePageQuery.getTeacherId() != null) {
+            queryWrapper.eq("teacher_id", coursePageQuery.getTeacherId());
+        }
+        
+        // 2. 分页查询课程
+        Page<Course> page = new Page<>(coursePageQuery.getPageNum(), coursePageQuery.getPageSize());
+        Page<Course> coursePage = this.page(page, queryWrapper);
 
-        // 2. 转换为CourseVO
+        // 3. 转换为CourseVO
         List<CourseVO> courseVOList = coursePage.getRecords().stream()
                 .map(course -> {
                     CourseVO courseVO = new CourseVO();
@@ -284,7 +325,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
                 })
                 .collect(Collectors.toList());
 
-        // 3. 构建分页结果
+        // 4. 构建分页结果
         return PageResult.of(
                 courseVOList,
                 coursePage.getTotal(),

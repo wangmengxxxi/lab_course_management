@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn compile:*)",
+      "Bash(tree:*)",
+      "Bash(dir:*)",
+      "Bash(powershell:*)",
+      "Bash(find:*)",
+      "Bash(mysql:*)",
+      "Bash(curl:*)",
+      "Bash(mvn clean compile:*)",
+      "Bash(xcopy:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

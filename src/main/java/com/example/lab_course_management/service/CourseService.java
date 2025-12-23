@@ -42,6 +42,15 @@ public interface CourseService extends IService<Course> {
     Long addCourse(CourseAddRequest courseAddRequest);
 
     /**
+     * 管理员审批课程(仅改变状态)
+     *
+     * @param courseId 课程ID
+     * @param status 状态(1-通过, 2-拒绝)
+     * @return 是否成功
+     */
+    Boolean approveCourse(Long courseId, Integer status);
+
+    /**
      * 管理员排课审批
      *
      * @param courseId 课程ID
@@ -61,10 +70,10 @@ public interface CourseService extends IService<Course> {
     /**
      * 分页查询课程列表
      *
-     * @param basePageQuery 分页查询参数
+     * @param coursePageQuery 分页查询参数(支持状态筛选)
      * @return 课程分页结果
      */
-    PageResult<CourseVO> listCoursesByPage(BasePageQuery basePageQuery);
+    PageResult<CourseVO> listCoursesByPage(com.example.lab_course_management.model.dto.query.CoursePageQuery coursePageQuery);
 
     /**
      * 删除课程

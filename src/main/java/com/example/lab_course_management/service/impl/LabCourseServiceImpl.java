@@ -45,6 +45,9 @@ public class LabCourseServiceImpl extends ServiceImpl<LabCourseMapper, LabCourse
     @Resource
     private ClassTimeSlotService classTimeSlotService;
 
+    @Resource
+    private UserService userService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createSchedule(LabCourseRequest labCourseRequest) {
@@ -258,6 +261,19 @@ public class LabCourseServiceImpl extends ServiceImpl<LabCourseMapper, LabCourse
         if (course != null) {
             LabCourseVO.CourseInfoVO courseInfoVO = new LabCourseVO.CourseInfoVO();
             BeanUtils.copyProperties(course, courseInfoVO);
+            
+            // 设置教师姓名
+            if (course.getTeacherId() != null) {
+                try {
+                    com.example.lab_course_management.entity.User teacher = userService.getUserById(course.getTeacherId());
+                    if (teacher != null) {
+                        courseInfoVO.setTeacherName(teacher.getRealName());
+                    }
+                } catch (Exception e) {
+                    log.warn("获取教师信息失败: teacherId={}", course.getTeacherId(), e);
+                }
+            }
+            
             vo.setCourse(courseInfoVO);
         }
 

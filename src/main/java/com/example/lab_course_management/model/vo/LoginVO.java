@@ -2,6 +2,8 @@ package com.example.lab_course_management.model.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 登录响应
  *
@@ -19,6 +21,11 @@ public class LoginVO {
      * 用户信息
      */
     private UserInfoVO userInfo;
+
+    /**
+     * 用户拥有的所有角色列表
+     */
+    private List<String> roles;
 
     @Data
     public static class UserInfoVO {

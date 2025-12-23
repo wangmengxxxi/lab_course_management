@@ -6,6 +6,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.example.lab_course_management.common.PageResult;
 import com.example.lab_course_management.common.Result;
 import com.example.lab_course_management.model.dto.query.BasePageQuery;
+import com.example.lab_course_management.model.dto.query.CoursePageQuery;
 import com.example.lab_course_management.model.dto.request.CourseAddRequest;
 import com.example.lab_course_management.model.dto.request.CourseUpdateRequest;
 import com.example.lab_course_management.model.dto.request.ScheduleRequest;
@@ -56,12 +57,13 @@ public class CourseController {
 
     @GetMapping
     @SaCheckRole(value={"admin", "teacher", "student"},mode = SaMode.OR)
-    @Operation(summary = "分页查询课程", description = "分页查询课程列表接口")
-    public Result<PageResult<CourseVO>> listCoursesByPage(@Valid BasePageQuery basePageQuery) {
-        log.info("分页查询课程: page={}, size={}", basePageQuery.getPageNum(), basePageQuery.getPageSize());
+    @Operation(summary = "分页查询课程", description = "分页查询课程列表接口,支持按状态筛选")
+    public Result<PageResult<CourseVO>> listCoursesByPage(@Valid CoursePageQuery coursePageQuery) {
+        log.info("分页查询课程: page={}, size={}, status={}", 
+                coursePageQuery.getPageNum(), coursePageQuery.getPageSize(), coursePageQuery.getStatus());
 
         try {
-            PageResult<CourseVO> pageResult = courseService.listCoursesByPage(basePageQuery);
+            PageResult<CourseVO> pageResult = courseService.listCoursesByPage(coursePageQuery);
             log.info("分页查询课程成功: total={}, current={}", pageResult.getTotal(), pageResult.getCurrent());
             return Result.success(pageResult, "查询成功");
         } catch (Exception e) {
@@ -131,6 +133,48 @@ public class CourseController {
             }
         } catch (Exception e) {
             log.error("更新课程失败: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    @PutMapping("/{id}/approve-simple")
+    @SaCheckRole("admin")
+    @Operation(summary = "管理员审批课程(仅改变状态)", description = "管理员审批课程通过,不进行排课")
+    public Result<Void> approveCourse(@PathVariable Long id) {
+        log.info("管理员审批课程通过: courseId={}", id);
+
+        try {
+            Boolean result = courseService.approveCourse(id, 1);
+            if (result) {
+                log.info("管理员审批课程通过成功: courseId={}", id);
+                return Result.success("审批通过");
+            } else {
+                log.warn("管理员审批课程通过失败: courseId={}", id);
+                return Result.error("审批失败");
+            }
+        } catch (Exception e) {
+            log.error("管理员审批课程通过失败: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    @PutMapping("/{id}/reject")
+    @SaCheckRole("admin")
+    @Operation(summary = "管理员拒绝课程", description = "管理员拒绝课程申请")
+    public Result<Void> rejectCourse(@PathVariable Long id) {
+        log.info("管理员拒绝课程: courseId={}", id);
+
+        try {
+            Boolean result = courseService.approveCourse(id, 2);
+            if (result) {
+                log.info("管理员拒绝课程成功: courseId={}", id);
+                return Result.success("已拒绝");
+            } else {
+                log.warn("管理员拒绝课程失败: courseId={}", id);
+                return Result.error("操作失败");
+            }
+        } catch (Exception e) {
+            log.error("管理员拒绝课程失败: {}", e.getMessage());
             throw e;
         }
     }

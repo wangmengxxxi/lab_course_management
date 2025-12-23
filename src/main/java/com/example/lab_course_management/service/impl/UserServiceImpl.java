@@ -12,6 +12,7 @@ import com.example.lab_course_management.entity.Role;
 import com.example.lab_course_management.exception.BussniesException;
 import com.example.lab_course_management.mapper.UserMapper;
 import com.example.lab_course_management.model.dto.query.BasePageQuery;
+import com.example.lab_course_management.model.dto.query.UserPageQuery;
 import com.example.lab_course_management.model.dto.request.UserAddRequest;
 import com.example.lab_course_management.model.dto.request.UserLoginRequest;
 import com.example.lab_course_management.model.dto.request.UserRegisterRequest;
@@ -148,9 +149,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 4. 记录登录会话
         StpUtil.login(user.getUserId());
 
-        // 5. 构造返回结果
+        // 5. 查询用户角色
+        List<String> roles = this.getUserRoles(user.getUserId());
+
+        // 6. 构造返回结果
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(StpUtil.getTokenValue());
+        loginVO.setRoles(roles);
 
         LoginVO.UserInfoVO userInfoVO = new LoginVO.UserInfoVO();
         BeanUtils.copyProperties(user, userInfoVO);
@@ -401,12 +406,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public PageResult<UserVO> listUsersByPage(BasePageQuery basePageQuery) {
-        // 1. 分页查询用户
-        Page<User> page = new Page<>(basePageQuery.getPageNum(), basePageQuery.getPageSize());
-        Page<User> userPage = this.page(page);
+    public PageResult<UserVO> listUsersByPage(UserPageQuery userPageQuery) {
+        // 1. 构建查询条件
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        
+        // 添加搜索条件(模糊查询)
+        if (StringUtils.isNotBlank(userPageQuery.getAccount())) {
+            queryWrapper.like("account", userPageQuery.getAccount());
+        }
+        if (StringUtils.isNotBlank(userPageQuery.getRealName())) {
+            queryWrapper.like("real_name", userPageQuery.getRealName());
+        }
+        if (StringUtils.isNotBlank(userPageQuery.getPhone())) {
+            queryWrapper.like("phone", userPageQuery.getPhone());
+        }
+        
+        // 2. 分页查询用户
+        Page<User> page = new Page<>(userPageQuery.getPageNum(), userPageQuery.getPageSize());
+        Page<User> userPage = this.page(page, queryWrapper);
 
-        // 2. 转换为UserVO
+        // 3. 转换为UserVO
         List<UserVO> userVOList = userPage.getRecords().stream()
                 .map(user -> {
                     UserVO userVO = new UserVO();
@@ -423,7 +442,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 })
                 .collect(Collectors.toList());
 
-        // 3. 构建分页结果
+        // 4. 构建分页结果
         return PageResult.of(
                 userVOList,
                 userPage.getTotal(),

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.lab_course_management.common.PageResult;
 import com.example.lab_course_management.entity.User;
 import com.example.lab_course_management.model.dto.query.BasePageQuery;
+import com.example.lab_course_management.model.dto.query.UserPageQuery;
 import com.example.lab_course_management.model.dto.request.UserAddRequest;
 import com.example.lab_course_management.model.dto.request.UserLoginRequest;
 import com.example.lab_course_management.model.dto.request.UserRegisterRequest;
@@ -108,8 +109,8 @@ public interface UserService extends IService<User> {
     /**
      * 分页查询用户列表
      *
-     * @param basePageQuery 分页查询参数
+     * @param userPageQuery 分页查询参数
      * @return 用户分页结果
      */
-    PageResult<UserVO> listUsersByPage(BasePageQuery basePageQuery);
+    PageResult<UserVO> listUsersByPage(UserPageQuery userPageQuery);
 }

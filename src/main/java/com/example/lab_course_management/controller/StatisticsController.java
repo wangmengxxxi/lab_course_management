@@ -5,6 +5,7 @@ import cn.dev33.satoken.annotation.SaMode;
 import com.example.lab_course_management.common.Result;
 import com.example.lab_course_management.model.vo.HotCourseVO;
 import com.example.lab_course_management.model.vo.LabUsageStatisticsVO;
+import com.example.lab_course_management.model.vo.OverviewStatisticsVO;
 import com.example.lab_course_management.service.StatisticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,17 @@ import java.util.List;
 public class StatisticsController {
 
     private final StatisticsService statisticsService;
+
+    /**
+     * 获取系统概览统计
+     */
+    @GetMapping("/overview")
+    @SaCheckRole("admin")
+    @Operation(summary = "获取系统概览统计", description = "获取用户、课程、实验室、公告等统计数据（仅管理员）")
+    public Result<OverviewStatisticsVO> getOverviewStatistics() {
+        OverviewStatisticsVO overview = statisticsService.getOverviewStatistics();
+        return Result.success(overview);
+    }
 
     /**
      * 获取实验室使用统计

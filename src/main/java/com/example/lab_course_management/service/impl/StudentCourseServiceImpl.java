@@ -57,6 +57,9 @@ public class StudentCourseServiceImpl extends ServiceImpl<StudentCourseMapper, S
     @Resource
     private ClassTimeSlotService classTimeSlotService;
 
+    @Resource
+    private LaboratoryService laboratoryService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean selectCourse(StudentCourseRequest studentCourseRequest) {
@@ -391,6 +394,50 @@ public class StudentCourseServiceImpl extends ServiceImpl<StudentCourseMapper, S
             vo.setCourse(courseInfoVO);
         }
 
+        // 设置排课信息
+        QueryWrapper<LabCourse> labCourseQuery = new QueryWrapper<>();
+        labCourseQuery.eq("course_id", studentCourse.getCourseId());
+        List<LabCourse> labCourses = labCourseService.list(labCourseQuery);
+        
+        if (!CollectionUtils.isEmpty(labCourses)) {
+            LabCourse labCourse = labCourses.get(0); // 取第一个排课记录
+            StudentCourseVO.ScheduleInfoVO scheduleInfoVO = new StudentCourseVO.ScheduleInfoVO();
+            
+            scheduleInfoVO.setLabId(labCourse.getLabId());
+            scheduleInfoVO.setDayOfWeek(labCourse.getDayOfWeek());
+            scheduleInfoVO.setSlotId(labCourse.getSlotId());
+            scheduleInfoVO.setStartWeek(labCourse.getStartWeek());
+            scheduleInfoVO.setEndWeek(labCourse.getEndWeek());
+            
+            // 获取星期几文本
+            String[] weekDays = {"", "周一", "周二", "周三", "周四", "周五", "周六", "周日"};
+            if (labCourse.getDayOfWeek() >= 1 && labCourse.getDayOfWeek() <= 7) {
+                scheduleInfoVO.setDayOfWeekText(weekDays[labCourse.getDayOfWeek()]);
+            }
+            
+            // 获取实验室名称
+            try {
+                Laboratory lab = laboratoryService.getLabById(labCourse.getLabId());
+                if (lab != null) {
+                    scheduleInfoVO.setLabName(lab.getLabName());
+                }
+            } catch (Exception e) {
+                log.warn("获取实验室信息失败: labId={}", labCourse.getLabId(), e);
+            }
+            
+            // 获取时间段名称
+            try {
+                ClassTimeSlot timeSlot = classTimeSlotService.getSlotById(labCourse.getSlotId());
+                if (timeSlot != null) {
+                    scheduleInfoVO.setTimeSlotName(timeSlot.getSlotName());
+                }
+            } catch (Exception e) {
+                log.warn("获取时间段信息失败: slotId={}", labCourse.getSlotId(), e);
+            }
+            
+            vo.setScheduleInfo(scheduleInfoVO);
+        }
+
         return vo;
     }
 
@@ -447,35 +494,40 @@ public class StudentCourseServiceImpl extends ServiceImpl<StudentCourseMapper, S
         Page<StudentCourse> page = new Page<>(basePageQuery.getPageNum(), basePageQuery.getPageSize());
         Page<StudentCourse> studentCoursePage = this.page(page, queryWrapper);
 
-        // 2. 转换为CourseVO
-        List<CourseVO> courseVOList = studentCoursePage.getRecords().stream()
-                .map(studentCourse -> {
-                    Course course = courseService.getCourseById(studentCourse.getCourseId());
-                    if (course == null) {
+        // 2. 转换为StudentCourseVO (包含scheduleInfo)
+        List<StudentCourseVO> studentCourseVOList = studentCoursePage.getRecords().stream()
+                .map(this::convertToVO)
+                .collect(Collectors.toList());
+
+        // 3. 转换为CourseVO格式以保持接口兼容性,但添加scheduleInfo
+        List<CourseVO> courseVOList = studentCourseVOList.stream()
+                .map(studentCourseVO -> {
+                    if (studentCourseVO.getCourse() == null) {
                         return null;
                     }
-
+                    
                     CourseVO courseVO = new CourseVO();
-                    BeanUtils.copyProperties(course, courseVO);
-
-                    // 获取教师姓名
-                    if (course.getTeacherId() != null) {
-                        User teacher = userService.getUserById(course.getTeacherId());
-                        if (teacher != null) {
-                            courseVO.setTeacherName(teacher.getRealName());
-                        }
+                    // 复制课程基本信息
+                    BeanUtils.copyProperties(studentCourseVO.getCourse(), courseVO);
+                    
+                    // 添加成绩信息
+                    courseVO.setUsualGrade(studentCourseVO.getUsualGrade());
+                    courseVO.setFinalGrade(studentCourseVO.getFinalGrade());
+                    courseVO.setGrade(studentCourseVO.getGrade());
+                    
+                    // 添加排课信息 - 这是关键!
+                    if (studentCourseVO.getScheduleInfo() != null) {
+                        CourseVO.ScheduleInfoVO scheduleInfoVO = new CourseVO.ScheduleInfoVO();
+                        BeanUtils.copyProperties(studentCourseVO.getScheduleInfo(), scheduleInfoVO);
+                        courseVO.setScheduleInfo(scheduleInfoVO);
                     }
-
-                    // 获取已选学生数
-                    Long studentCount = getCourseStudentCount(course.getCourseId());
-                    courseVO.setEnrolledStudents(studentCount != null ? studentCount.intValue() : 0);
-
+                    
                     return courseVO;
                 })
                 .filter(courseVO -> courseVO != null)
                 .collect(Collectors.toList());
 
-        // 3. 构建分页结果
+        // 4. 构建分页结果
         return PageResult.of(
                 courseVOList,
                 studentCoursePage.getTotal(),

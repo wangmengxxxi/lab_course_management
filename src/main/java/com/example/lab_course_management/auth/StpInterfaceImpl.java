@@ -75,7 +75,7 @@ public class StpInterfaceImpl implements StpInterface {
     }
 
     /**
-     * 返回一个账号
+     * 返回角色名称列表
      *
      */
     @Override

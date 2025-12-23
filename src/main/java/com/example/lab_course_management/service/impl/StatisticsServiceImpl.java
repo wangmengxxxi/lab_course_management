@@ -1,11 +1,17 @@
 package com.example.lab_course_management.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.lab_course_management.entity.Announcement;
 import com.example.lab_course_management.entity.Course;
+import com.example.lab_course_management.entity.Laboratory;
+import com.example.lab_course_management.entity.User;
+import com.example.lab_course_management.mapper.AnnouncementMapper;
 import com.example.lab_course_management.mapper.CourseMapper;
 import com.example.lab_course_management.mapper.LaboratoryMapper;
+import com.example.lab_course_management.mapper.UserMapper;
 import com.example.lab_course_management.model.vo.HotCourseVO;
 import com.example.lab_course_management.model.vo.LabUsageStatisticsVO;
+import com.example.lab_course_management.model.vo.OverviewStatisticsVO;
 import com.example.lab_course_management.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +29,62 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private final CourseMapper courseMapper;
     private final LaboratoryMapper laboratoryMapper;
+    private final UserMapper userMapper;
+    private final AnnouncementMapper announcementMapper;
+
+    @Override
+    public OverviewStatisticsVO getOverviewStatistics() {
+        log.info("获取系统概览统计");
+
+        OverviewStatisticsVO overview = new OverviewStatisticsVO();
+
+        // 统计用户总数
+        Long totalUsers = userMapper.selectCount(null);
+        overview.setTotalUsers(totalUsers);
+
+        // 统计学生数 - 通过user_role表关联查询
+        // role_id=3 是student角色
+        Long totalStudents = userMapper.selectCount(
+            new QueryWrapper<User>()
+                .inSql("user_id", "SELECT user_id FROM user_role WHERE role_id = 3")
+        );
+        overview.setTotalStudents(totalStudents);
+
+        // 统计教师数 - 通过user_role表关联查询
+        // role_id=2 是teacher角色
+        Long totalTeachers = userMapper.selectCount(
+            new QueryWrapper<User>()
+                .inSql("user_id", "SELECT user_id FROM user_role WHERE role_id = 2")
+        );
+        overview.setTotalTeachers(totalTeachers);
+
+        // 统计课程总数
+        Long totalCourses = courseMapper.selectCount(null);
+        overview.setTotalCourses(totalCourses);
+
+        // 统计已发布课程
+        QueryWrapper<Course> publishedQuery = new QueryWrapper<>();
+        publishedQuery.eq("status", 1);
+        Long publishedCourses = courseMapper.selectCount(publishedQuery);
+        overview.setPublishedCourses(publishedCourses);
+
+        // 统计待审批课程
+        QueryWrapper<Course> pendingQuery = new QueryWrapper<>();
+        pendingQuery.eq("status", 0);
+        Long pendingCourses = courseMapper.selectCount(pendingQuery);
+        overview.setPendingCourses(pendingCourses);
+
+        // 统计实验室总数
+        Long totalLabs = laboratoryMapper.selectCount(null);
+        overview.setTotalLabs(totalLabs);
+
+        // 统计公告总数
+        Long totalAnnouncements = announcementMapper.selectCount(null);
+        overview.setTotalAnnouncements(totalAnnouncements);
+
+        log.info("系统概览统计: {}", overview);
+        return overview;
+    }
 
     
     @Override

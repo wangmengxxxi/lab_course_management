@@ -2,6 +2,7 @@ package com.example.lab_course_management.model.vo;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -66,4 +67,36 @@ public class CourseVO {
      * 更新时间
      */
     private LocalDateTime updateTime;
+
+    /**
+     * 平时成绩
+     */
+    private BigDecimal usualGrade;
+
+    /**
+     * 期末成绩
+     */
+    private BigDecimal finalGrade;
+
+    /**
+     * 总成绩
+     */
+    private BigDecimal grade;
+
+    /**
+     * 排课信息
+     */
+    private ScheduleInfoVO scheduleInfo;
+
+    @Data
+    public static class ScheduleInfoVO {
+        private Long labId;
+        private String labName;
+        private Integer dayOfWeek;
+        private String dayOfWeekText;
+        private Long slotId;
+        private String timeSlotName;
+        private Integer startWeek;
+        private Integer endWeek;
+    }
 }

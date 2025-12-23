@@ -276,7 +276,7 @@ mvn spring-boot:run
 ### 测试账号
 
 系统提供以下测试账号：
-- 管理员: admin / 123456
+- 管理员: admin / 12345678
 - 教师: teacher_wang / 123456
 - 学生: student_zhang / 123456
 

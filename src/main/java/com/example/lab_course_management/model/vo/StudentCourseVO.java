@@ -63,6 +63,11 @@ public class StudentCourseVO {
      */
     private LocalDateTime updateTime;
 
+    /**
+     * 排课信息
+     */
+    private ScheduleInfoVO scheduleInfo;
+
     @Data
     public static class StudentInfoVO {
         private Long userId;
@@ -83,5 +88,17 @@ public class StudentCourseVO {
         private String teacherName;
         private Integer status;
         private Integer maxStudents;
+    }
+
+    @Data
+    public static class ScheduleInfoVO {
+        private Long labId;
+        private String labName;
+        private Integer dayOfWeek;
+        private String dayOfWeekText;
+        private Long slotId;
+        private String timeSlotName;
+        private Integer startWeek;
+        private Integer endWeek;
     }
 }

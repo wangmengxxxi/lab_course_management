@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.example.lab_course_management.common.PageResult;
 import com.example.lab_course_management.common.Result;
 import com.example.lab_course_management.model.dto.query.BasePageQuery;
+import com.example.lab_course_management.model.dto.query.UserPageQuery;
 import com.example.lab_course_management.model.dto.request.UserAddRequest;
 import com.example.lab_course_management.model.dto.request.UserLoginRequest;
 import com.example.lab_course_management.model.dto.request.UserRegisterRequest;
@@ -156,12 +157,14 @@ public class UserController {
     }
 
     @GetMapping
-    @Operation(summary = "分页查询用户", description = "分页查询用户列表")
-    public Result<PageResult<UserVO>> listUsersByPage(@Valid BasePageQuery basePageQuery) {
-        log.info("分页查询用户: page={}, size={}", basePageQuery.getPageNum(), basePageQuery.getPageSize());
+    @Operation(summary = "分页查询用户", description = "分页查询用户列表,支持按账号、姓名、手机号搜索")
+    public Result<PageResult<UserVO>> listUsersByPage(@Valid UserPageQuery userPageQuery) {
+        log.info("分页查询用户: page={}, size={}, account={}, realName={}, phone={}", 
+                userPageQuery.getPageNum(), userPageQuery.getPageSize(), 
+                userPageQuery.getAccount(), userPageQuery.getRealName(), userPageQuery.getPhone());
 
         try {
-            PageResult<UserVO> pageResult = userService.listUsersByPage(basePageQuery);
+            PageResult<UserVO> pageResult = userService.listUsersByPage(userPageQuery);
             log.info("分页查询用户成功: total={}, current={}", pageResult.getTotal(), pageResult.getCurrent());
             return Result.success(pageResult, "查询成功");
         } catch (Exception e) {

@@ -70,6 +70,7 @@ public class LabCourseVO {
         private String description;
         private Integer credit;
         private Long teacherId;
+        private String teacherName;
     }
 
     @Data

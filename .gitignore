@@ -1,32 +1,61 @@
-# IntelliJ IDEA
-.idea/
-*.iml
-
-# VSCode
-.vscode/
-
-# Build output
-target/
-
 # Maven
-log/
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Spring Boot
-spring.log
-
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
-# AI tools
-.claude/
+# Frontend - Node modules
+lab_mamange_front/node_modules/
+lab_mamange_front/dist/
+lab_mamange_front/dist-ssr/
+lab_mamange_front/.vite/
 
-# Local config
-*.local
-*.local.json
+# Frontend - Build outputs
+lab_mamange_front/build/
+lab_mamange_front/.cache/
+
+# Frontend - Environment files
+lab_mamange_front/.env.local
+lab_mamange_front/.env.*.local
+
+# Frontend - Editor directories
+lab_mamange_front/.vscode/*
+!lab_mamange_front/.vscode/extensions.json
+lab_mamange_front/.idea/
+
+# Frontend - Misc
+lab_mamange_front/*.local
+
+# Database
+*.db
+*.sqlite
 
 # Temporary files
 *.tmp
-*.cache
+*.temp
+
+# Application specific
+application-local.yml
+application-dev.yml
