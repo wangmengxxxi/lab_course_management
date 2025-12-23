@@ -15,7 +15,7 @@
         >
           <el-menu-item index="/student/dashboard">
             <el-icon><HomeFilled /></el-icon>
-            <span>仪表板</span>
+            <span>首页</span>
           </el-menu-item>
           <el-menu-item index="/student/courses">
             <el-icon><Reading /></el-icon>

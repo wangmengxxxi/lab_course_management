@@ -15,7 +15,7 @@
         >
           <el-menu-item index="/admin/dashboard">
             <el-icon><HomeFilled /></el-icon>
-            <span>仪表板</span>
+            <span>首页</span>
           </el-menu-item>
           <el-menu-item index="/admin/users">
             <el-icon><User /></el-icon>

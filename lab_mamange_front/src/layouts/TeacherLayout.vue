@@ -15,11 +15,15 @@
         >
           <el-menu-item index="/teacher/dashboard">
             <el-icon><HomeFilled /></el-icon>
-            <span>仪表板</span>
+            <span>首页</span>
           </el-menu-item>
           <el-menu-item index="/teacher/courses">
             <el-icon><Reading /></el-icon>
             <span>我的课程</span>
+          </el-menu-item>
+          <el-menu-item index="/teacher/apply-course">
+            <el-icon><Plus /></el-icon>
+            <span>申请课程</span>
           </el-menu-item>
           <el-menu-item index="/teacher/grades">
             <el-icon><EditPen /></el-icon>
@@ -74,7 +78,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { HomeFilled, Reading, EditPen, Calendar, UserFilled, ArrowDown, SwitchButton } from '@element-plus/icons-vue'
+import { HomeFilled, Reading, EditPen, Calendar, Plus, UserFilled, ArrowDown, SwitchButton } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import RoleSwitcher from '@/components/RoleSwitcher.vue'
 

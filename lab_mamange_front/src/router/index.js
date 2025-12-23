@@ -85,6 +85,12 @@ const router = createRouter({
           meta: { requiresAuth: true, role: 'teacher' }
         },
         {
+          path: 'apply-course',
+          name: 'ApplyCourse',
+          component: () => import('@/views/teacher/ApplyCourse.vue'),
+          meta: { requiresAuth: true, role: 'teacher' }
+        },
+        {
           path: 'course/:courseId/students',
           name: 'CourseStudents',
           component: () => import('@/views/teacher/CourseStudents.vue'),
