@@ -321,6 +321,9 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
                     long enrolledCount = studentCourseService.getCourseStudentCount(course.getCourseId());
                     courseVO.setEnrolledStudents((int) enrolledCount);
 
+                    // 获取排课信息(取第一条排课记录作为主要显示)
+                    courseVO.setScheduleInfo(getScheduleInfo(course.getCourseId()));
+
                     return courseVO;
                 })
                 .collect(Collectors.toList());
@@ -332,6 +335,63 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
                 coursePage.getCurrent(),
                 coursePage.getSize()
         );
+    }
+
+    /**
+     * 获取课程的排课信息
+     */
+    private CourseVO.ScheduleInfoVO getScheduleInfo(Long courseId) {
+        if (courseId == null) return null;
+        
+        QueryWrapper<LabCourse> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("course_id", courseId);
+        queryWrapper.orderByAsc("day_of_week", "slot_id");
+        List<LabCourse> labCourses = labCourseService.list(queryWrapper);
+        
+        if (labCourses == null || labCourses.isEmpty()) {
+            return null;
+        }
+        
+        // 取第一条排课记录
+        LabCourse labCourse = labCourses.get(0);
+        CourseVO.ScheduleInfoVO scheduleInfo = new CourseVO.ScheduleInfoVO();
+        scheduleInfo.setLabId(labCourse.getLabId());
+        scheduleInfo.setDayOfWeek(labCourse.getDayOfWeek());
+        scheduleInfo.setDayOfWeekText(getDayOfWeekText(labCourse.getDayOfWeek()));
+        scheduleInfo.setSlotId(labCourse.getSlotId());
+        scheduleInfo.setStartWeek(labCourse.getStartWeek());
+        scheduleInfo.setEndWeek(labCourse.getEndWeek());
+        
+        // 获取实验室名称
+        Laboratory lab = laboratoryService.getById(labCourse.getLabId());
+        if (lab != null) {
+            scheduleInfo.setLabName(lab.getLabName());
+        }
+        
+        // 获取时间段名称
+        ClassTimeSlot timeSlot = classTimeSlotService.getById(labCourse.getSlotId());
+        if (timeSlot != null) {
+            scheduleInfo.setTimeSlotName(timeSlot.getSlotName());
+        }
+        
+        return scheduleInfo;
+    }
+
+    /**
+     * 获取星期几的文本描述
+     */
+    private String getDayOfWeekText(Integer dayOfWeek) {
+        if (dayOfWeek == null) return "";
+        switch (dayOfWeek) {
+            case 1: return "周一";
+            case 2: return "周二";
+            case 3: return "周三";
+            case 4: return "周四";
+            case 5: return "周五";
+            case 6: return "周六";
+            case 7: return "周日";
+            default: return "";
+        }
     }
 
     @Override

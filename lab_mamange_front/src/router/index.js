@@ -62,6 +62,18 @@ const router = createRouter({
           name: 'AnnouncementManagement',
           component: () => import('@/views/admin/AnnouncementManagement.vue'),
           meta: { requiresAuth: true, role: 'admin' }
+        },
+        {
+          path: 'student-enrollments',
+          name: 'StudentEnrollmentManagement',
+          component: () => import('@/views/admin/StudentEnrollmentManagement.vue'),
+          meta: { requiresAuth: true, role: 'admin' }
+        },
+        {
+          path: 'enroll-student',
+          name: 'AdminEnrollStudent',
+          component: () => import('@/views/admin/AdminEnrollStudent.vue'),
+          meta: { requiresAuth: true, role: 'admin' }
         }
       ]
     },

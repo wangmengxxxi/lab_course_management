@@ -253,12 +253,22 @@ public class StudentCourseServiceImpl extends ServiceImpl<StudentCourseMapper, S
 
     @Override
     public boolean checkStudentCourseConflict(Long courseId, Long studentId) {
+        log.info("=== 开始检测选课冲突 === courseId={}, studentId={}", courseId, studentId);
+        
         // 1. 获取新课程的排课信息
         QueryWrapper<LabCourse> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("course_id", courseId);
         List<LabCourse> newCourseSchedules = labCourseService.list(queryWrapper);
 
+        log.info("新课程(courseId={})的排课记录数: {}", courseId, newCourseSchedules.size());
+        for (LabCourse schedule : newCourseSchedules) {
+            log.info("  新课程排课: day={}, slot={}, week={}-{}", 
+                schedule.getDayOfWeek(), schedule.getSlotId(), 
+                schedule.getStartWeek(), schedule.getEndWeek());
+        }
+
         if (CollectionUtils.isEmpty(newCourseSchedules)) {
+            log.info("新课程没有排课信息，无冲突");
             return false; // 没有排课信息，无冲突
         }
 
@@ -267,25 +277,34 @@ public class StudentCourseServiceImpl extends ServiceImpl<StudentCourseMapper, S
         studentCourseQueryWrapper.eq("student_id", studentId);
         List<StudentCourse> studentCourses = this.list(studentCourseQueryWrapper);
 
+        log.info("学生(studentId={})已选课程数: {}", studentId, studentCourses.size());
+
         if (CollectionUtils.isEmpty(studentCourses)) {
+            log.info("学生没有已选课程，无冲突");
             return false; // 没有已选课程，无冲突
         }
 
         // 3. 检查时间冲突
         for (StudentCourse studentCourse : studentCourses) {
+            log.info("检查与已选课程(courseId={})的冲突", studentCourse.getCourseId());
+            
             QueryWrapper<LabCourse> existingCourseQueryWrapper = new QueryWrapper<>();
             existingCourseQueryWrapper.eq("course_id", studentCourse.getCourseId());
             List<LabCourse> existingCourseSchedules = labCourseService.list(existingCourseQueryWrapper);
+
+            log.info("  已选课程(courseId={})的排课记录数: {}", studentCourse.getCourseId(), existingCourseSchedules.size());
 
             // 检查新课程与每个已选课程的时间冲突
             for (LabCourse newSchedule : newCourseSchedules) {
                 for (LabCourse existingSchedule : existingCourseSchedules) {
                     if (StudentScheduleUtils.hasCourseConflict(newSchedule, existingSchedule)) {
+
                         return true; // 发现冲突
                     }
                 }
             }
         }
+
 
         return false; // 无冲突
     }

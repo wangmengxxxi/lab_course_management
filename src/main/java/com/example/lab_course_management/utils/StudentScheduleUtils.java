@@ -24,7 +24,12 @@ public class StudentScheduleUtils {
             return false;
         }
 
-        // 检查时间区间是否重叠
+        // 检查时间段是否相同
+        if (!newCourse.getSlotId().equals(existingCourse.getSlotId())) {
+            return false;
+        }
+
+        // 检查周次区间是否重叠
         return CourseScheduleUtils.hasTimeOverlap(
             newCourse.getStartWeek(), newCourse.getEndWeek(),
             existingCourse.getStartWeek(), existingCourse.getEndWeek()

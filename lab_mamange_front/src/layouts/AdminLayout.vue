@@ -37,6 +37,14 @@
             <el-icon><Bell /></el-icon>
             <span>公告管理</span>
           </el-menu-item>
+          <el-menu-item index="/admin/student-enrollments">
+            <el-icon><Tickets /></el-icon>
+            <span>选课记录管理</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/enroll-student">
+            <el-icon><Edit /></el-icon>
+            <span>代学生选课</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
 
@@ -82,7 +90,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { HomeFilled, User, OfficeBuilding, Reading, Calendar, Bell, UserFilled, ArrowDown, SwitchButton } from '@element-plus/icons-vue'
+import { HomeFilled, User, OfficeBuilding, Reading, Calendar, Bell, Tickets, Edit, UserFilled, ArrowDown, SwitchButton } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import RoleSwitcher from '@/components/RoleSwitcher.vue'
 

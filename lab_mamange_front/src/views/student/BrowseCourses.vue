@@ -45,7 +45,18 @@
           </template>
         </el-table-column>
         <el-table-column prop="semester" label="学期" width="120" />
-        <el-table-column prop="description" label="课程描述" min-width="200" show-overflow-tooltip />
+        <el-table-column label="上课时间" width="180">
+          <template #default="{ row }">
+            <div v-if="row.scheduleInfo">
+              <div>{{ row.scheduleInfo.dayOfWeekText }} {{ row.scheduleInfo.timeSlotName }}</div>
+              <div style="color: #909399; font-size: 12px">
+                第{{ row.scheduleInfo.startWeek }}-{{ row.scheduleInfo.endWeek }}周
+              </div>
+            </div>
+            <span v-else style="color: #909399">暂无排课</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="description" label="课程描述" min-width="150" show-overflow-tooltip />
         <el-table-column label="操作" fixed="right" width="120">
           <template #default="{ row }">
             <el-button

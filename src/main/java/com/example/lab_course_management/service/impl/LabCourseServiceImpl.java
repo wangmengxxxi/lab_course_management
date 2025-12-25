@@ -171,7 +171,7 @@ public class LabCourseServiceImpl extends ServiceImpl<LabCourseMapper, LabCourse
         queryWrapper.eq("lab_id", labCourseRequest.getLabId());
         queryWrapper.eq("slot_id", labCourseRequest.getSlotId());
         queryWrapper.eq("day_of_week", labCourseRequest.getDayOfWeek());
-
+        
         // 排除指定的排课记录（用于更新时）
         if (excludeScheduleId != null) {
             queryWrapper.ne("id", excludeScheduleId);
@@ -181,6 +181,7 @@ public class LabCourseServiceImpl extends ServiceImpl<LabCourseMapper, LabCourse
         if (CollectionUtils.isEmpty(existingSchedules)) {
             return false;
         }
+
 
         // 创建新的排课对象用于冲突检测
         LabCourse newLabCourse = new LabCourse();
